@@ -217,6 +217,23 @@
       attach: function (inst) { s.inst = inst; }
     };
 
+    /* One dot per task so a learner can see at a glance what is answered,
+       what was skipped, and jump straight to any of them. */
+    var dots = el('div', { class: 'qdots', role: 'list', 'aria-label': 'All tasks in this assessment' },
+      s.items.map(function (it, i) {
+        var answered = s.answers[it.id] != null;
+        var state = i === s.idx ? 'is-current'
+          : answered ? 'is-done'
+          : i < s.idx ? 'is-skip' : '';
+        var label = 'Task ' + (i + 1) + (i === s.idx ? ' (current)'
+          : answered ? ' — answered' : i < s.idx ? ' — skipped' : '');
+        return el('button', {
+          class: 'qdot ' + state, type: 'button', role: 'listitem',
+          title: label, 'aria-label': label, 'aria-current': i === s.idx ? 'true' : null,
+          onclick: function () { if (i !== s.idx) { finalizeCurrent(); s.idx = i; App.go('run'); } }
+        });
+      }));
+
     main.appendChild(el('div', { class: 'run-top' }, [
       el('div', { class: 'run-meta' }, [
         el('span', { class: 'run-mod', text: s.module.name }),
@@ -225,7 +242,8 @@
       el('div', { class: 'progress', role: 'progressbar', 'aria-valuenow': String(s.idx + 1),
         'aria-valuemin': '1', 'aria-valuemax': String(n) }, [
         el('span', { class: 'progress-fill', style: { width: (((s.idx + 1) / n) * 100) + '%' } })
-      ])
+      ]),
+      dots
     ]));
 
     var promptRow = el('div', { class: 'prompt-row' }, [
@@ -248,7 +266,7 @@
         class: 'dl-btn dl-btn-ghost', type: 'button', text: '‹ Previous', disabled: s.idx === 0,
         onclick: function () { finalizeCurrent(); s.idx--; App.go('run'); }
       }),
-      el('button', {
+      s.idx === n - 1 ? null : el('button', {
         class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Skip',
         onclick: function () { finalizeCurrent(); advance(); }
       }),
@@ -273,7 +291,18 @@
   function advance() {
     var s = App.session;
     if (s.idx < s.items.length - 1) { s.idx++; App.go('run'); }
-    else { D.finishSession(s); App.go('results'); }
+    else {
+      /* Review gate: don't let a learner finish while tasks sit unanswered
+         without being told — those would be marked wrong. */
+      var un = s.items.filter(function (it) { return s.answers[it.id] == null; });
+      if (un.length) {
+        var msg = un.length + (un.length === 1 ? ' task has' : ' tasks have') +
+          ' no answer recorded and would be marked wrong.\n\n' +
+          'Click Cancel to go back and finish them, or OK to submit as is.';
+        if (!confirm(msg)) { s.idx = s.items.indexOf(un[0]); App.go('run'); return; }
+      }
+      D.finishSession(s); App.go('results');
+    }
   }
 
   D.speak = speak;

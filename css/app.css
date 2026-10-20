@@ -159,6 +159,15 @@ p { margin: 0 0 .8em; }
 .run-nav { display: flex; gap: .5rem; justify-content: flex-end; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: .9rem; }
 .quitlink { background: none; border: 0; color: var(--muted); font: inherit; font-size: .78rem; cursor: pointer; margin-top: .8rem; text-decoration: underline; }
 .sim-footnote { font-size: .78rem; color: var(--muted); margin-top: .4rem; }
+/* task dots: one per task, clickable, showing answered / skipped / current */
+.qdots { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .6rem; }
+.qdot { width: 1.1rem; height: 1.1rem; flex: none; padding: 0; font-size: 0; cursor: pointer;
+  border-radius: 50%; border: 1px solid var(--line-2); background: var(--surface);
+  transition: transform .08s ease-out, background .12s, border-color .12s, box-shadow .12s; }
+.qdot:hover { transform: scale(1.14); border-color: var(--teal); }
+.qdot.is-done { background: var(--teal); border-color: var(--teal); }
+.qdot.is-skip { background: var(--amber-l); border-color: var(--amber); }
+.qdot.is-current { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-l); }
 
 /* ---------- item types ---------- */
 .opt-list { display: flex; flex-direction: column; gap: .45rem; max-width: 42rem; }
@@ -752,6 +761,10 @@ p { margin: 0 0 .8em; }
 .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1rem; }
 .skills-grid h2 { display: flex; align-items: center; justify-content: space-between; font-size: 1rem; }
 .skills-grid h2 b { font-size: .8rem; background: var(--paper); border: 1px solid var(--line); border-radius: 99px; padding: 0 .55rem; }
+/* trainer/invigilator export tools, kept visually secondary to the learner's next step */
+.trainer-card { margin-top: 1.4rem; background: var(--paper); }
+.trainer-title { font-size: .95rem; font-family: var(--serif); }
+.trainer-card .action-row { margin-top: .6rem; }
 .skill-list { list-style: none; margin: 0; padding: 0; }
 .skill-list li { display: flex; align-items: center; gap: .5rem; padding: .28rem 0; border-bottom: 1px dotted var(--line); font-size: .88rem; }
 .skill-list li em { margin-left: auto; font-style: normal; font-size: .72rem; color: var(--muted); }
@@ -1003,6 +1016,7 @@ p { margin: 0 0 .8em; }
   .qr-overlay, .qr-card { animation: none; }
   .rotate-ic { animation: none; }
   .dl-btn:not(:disabled):active, .qr-close:active { transform: none; }
+  .qdot:hover { transform: none; }
 }
 .qr-intro { margin: 0 0 14px; font-size: .82rem; color: var(--muted); line-height: 1.45; }
 .qr-code { width: 248px; height: 248px; margin: 0 auto; background: #fff; border: 1px solid var(--line);

@@ -239,31 +239,44 @@
       ]));
     }
 
+    /* Learner-facing next step comes first and alone, so it reads clearly:
+       a pass leads to the certificate, a fail leads straight back in. The
+       export tools below are an invigilator task, kept out of the way. */
     main.appendChild(el('div', { class: 'action-row' }, [
-      el('button', { class: 'dl-btn dl-btn-primary', type: 'button', text: 'Save result file',
-        onclick: function () { download(resultFilename(s, 'json'), JSON.stringify(resultPayload(s), null, 2), 'application/json'); } }),
-      el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Save as CSV row',
-        onclick: function () {
-          var a = { learner: s.learner, moduleName: s.module.name, score: r.score, passed: r.passed,
-            got: r.got, items: r.items, minutes: 1, at: D.timeStamp(s.finishedAt) };
-          download(resultFilename(s, 'csv'), D.attemptsCsv([a]), 'text/csv');
-        } }),
-      el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Share result…',
-        onclick: function () { shareOrDownload(resultFilename(s, 'json'), JSON.stringify(resultPayload(s), null, 2), 'application/json', (s.learner.name || 'Trainee') + ' — ' + s.module.name); } }),
-      el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Show QR',
-        onclick: function () {
-          openQrModal('Scan this result', 'Scan with a phone to capture it. ' + QR_FIELDS,
-            [{ text: recLine(s.learner.name, s.learner.admno, s.learner.classGroup, s.module.name, pct, r.passed, D.timeStamp(s.finishedAt)),
-               caption: (s.learner.name || 'Unnamed') + ' · ' + s.module.name + ' · ' + pct + '%' }]);
-        } }),
-      el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Print results sheet',
-        onclick: function () { window.print(); } }),
-      r.passed ? el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'View certificate',
-        onclick: function () { D.app.go('certificate'); } }) : null,
-      el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Retake this module',
-        onclick: function () { D.app.go('intro', { moduleId: s.moduleId }); } }),
+      r.passed
+        ? el('button', { class: 'dl-btn dl-btn-primary dl-btn-lg', type: 'button', text: 'View certificate',
+            onclick: function () { D.app.go('certificate'); } })
+        : el('button', { class: 'dl-btn dl-btn-primary dl-btn-lg', type: 'button', text: 'Retake this module',
+            onclick: function () { D.app.go('intro', { moduleId: s.moduleId }); } }),
+      r.passed ? el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Retake this module',
+        onclick: function () { D.app.go('intro', { moduleId: s.moduleId }); } }) : null,
       el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'All modules',
         onclick: function () { D.app.go('home'); } })
+    ]));
+
+    main.appendChild(el('section', { class: 'card trainer-card no-print' }, [
+      el('h2', { class: 'trainer-title', text: 'For your trainer' }),
+      el('p', { class: 'muted', text: 'Save or hand this result to the invigilator. Nothing is sent anywhere automatically.' }),
+      el('div', { class: 'action-row trainer-actions' }, [
+        el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Save result file',
+          onclick: function () { download(resultFilename(s, 'json'), JSON.stringify(resultPayload(s), null, 2), 'application/json'); } }),
+        el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Save as CSV row',
+          onclick: function () {
+            var a = { learner: s.learner, moduleName: s.module.name, score: r.score, passed: r.passed,
+              got: r.got, items: r.items, minutes: 1, at: D.timeStamp(s.finishedAt) };
+            download(resultFilename(s, 'csv'), D.attemptsCsv([a]), 'text/csv');
+          } }),
+        el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Share result…',
+          onclick: function () { shareOrDownload(resultFilename(s, 'json'), JSON.stringify(resultPayload(s), null, 2), 'application/json', (s.learner.name || 'Trainee') + ' — ' + s.module.name); } }),
+        el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Show QR',
+          onclick: function () {
+            openQrModal('Scan this result', 'Scan with a phone to capture it. ' + QR_FIELDS,
+              [{ text: recLine(s.learner.name, s.learner.admno, s.learner.classGroup, s.module.name, pct, r.passed, D.timeStamp(s.finishedAt)),
+                 caption: (s.learner.name || 'Unnamed') + ' · ' + s.module.name + ' · ' + pct + '%' }]);
+          } }),
+        el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Print results sheet',
+          onclick: function () { window.print(); } })
+      ])
     ]));
   };
 
