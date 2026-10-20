@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DigiLit — Digital Literacy Assessments</title>
+<meta name="description" content="Offline performance-based digital literacy assessments. Rift Valley National Polytechnic, ICT Department.">
+<link rel="stylesheet" href="css/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230e5c63'/><path d='M9 22V10h5a6 6 0 0 1 0 12z' fill='%23fff'/></svg>">
+</head>
+<body>
+
+<div id="app"></div>
+
+<noscript>
+  <p style="padding:2rem;font-family:system-ui">DigiLit needs JavaScript. It still needs no internet connection — only a browser with scripting enabled.</p>
+</noscript>
+
+<!-- Engine. Loaded as plain scripts so the whole app runs from file:// or a USB
+     stick with no server, no build step and no network. -->
+<script src="js/core.js"></script>
+<script src="js/modules.js"></script>
+<script src="js/vfs.js"></script>
+<script src="js/sim-os.js"></script>
+<script src="js/sim-browser.js"></script>
+<script src="js/sim-mail.js"></script>
+<script src="js/sim-office.js"></script>
+<script src="js/items.js"></script>
+<script src="js/results.js"></script>
+
+<!-- Item banks, grouped by the CDACC unit's seven learning outcomes.
+     One file per module: add tasks by editing these. -->
+<!-- LO1 · Operate computer devices -->
+<script src="banks/bcs.js"></script>
+<script src="banks/win10.js"></script>
+<script src="banks/win11.js"></script>
+<script src="banks/connect.js"></script>
+<!-- LO2 · Solve tasks using the Office suite -->
+<script src="banks/word.js"></script>
+<script src="banks/excel.js"></script>
+<script src="banks/ppt.js"></script>
+<!-- LO3 · Manage data and information -->
+<script src="banks/datainfo.js"></script>
+<script src="banks/net.js"></script>
+<script src="banks/infolit.js"></script>
+<!-- LO4 · Online communication and collaboration -->
+<script src="banks/email.js"></script>
+<script src="banks/collab.js"></script>
+<script src="banks/clouddocs.js"></script>
+<script src="banks/social.js"></script>
+<script src="banks/distlearn.js"></script>
+<!-- LO5 · Apply cybersecurity skills -->
+<script src="banks/cyberlaw.js"></script>
+<script src="banks/cybersafe.js"></script>
+<script src="banks/footprint.js"></script>
+<!-- LO6 · Perform online jobs -->
+<script src="banks/onlinejobs.js"></script>
+<!-- LO7 · Apply job entry techniques -->
+<script src="banks/jobentry.js"></script>
+<script src="banks/career.js"></script>
+<!-- RVNP extensions · beyond the official unit -->
+<script src="banks/payments.js"></script>
+<script src="banks/telehealth.js"></script>
+
+<!-- Runner last: it boots the app once everything is registered. -->
+<script src="js/engine.js"></script>
+
+</body>
+</html>
