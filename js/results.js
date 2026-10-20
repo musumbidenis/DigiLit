@@ -74,6 +74,78 @@
   }
   D.download = download;
 
+  /* ---------------- offline collection: OS share sheet + QR ----------------
+     No LAN needed. shareOrDownload hands the file to the device's native share
+     sheet (Bluetooth, Nearby Share, AirDrop, …) where the browser supports it,
+     and falls back to a plain download. The QR codes let a trainer walk the lab
+     and scan each result with a phone — no cables, no stick. */
+
+  function shareOrDownload(filename, text, mime, label) {
+    try {
+      if (navigator.share && window.File) {
+        var file = new File([text], filename, { type: mime || 'text/plain' });
+        if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: 'DigiLit results', text: label || filename })
+            .catch(function (e) { if (e && e.name !== 'AbortError') download(filename, text, mime); });
+          return;
+        }
+      }
+    } catch (e) {}
+    download(filename, text, mime);   /* browser has no file share — save instead */
+  }
+  D.shareOrDownload = shareOrDownload;
+
+  function qrSvg(text) {
+    if (typeof qrcode === 'undefined') return null;
+    try {
+      var qr = qrcode(0, 'M');          /* auto-size, medium error correction */
+      qr.addData(String(text));
+      qr.make();
+      return qr.createSvgTag({ cellSize: 5, margin: 12, scalable: true });
+    } catch (e) { return null; }        /* payload too big for one code */
+  }
+
+  /* pages: [{ text, caption }] — one scannable code each. */
+  function openQrModal(title, intro, pages) {
+    if (typeof qrcode === 'undefined') { alert('The QR generator did not load. Use Export CSV or Share instead.'); return; }
+    if (!pages.length) { alert('Nothing to show yet.'); return; }
+    var idx = 0;
+    var overlay = el('div', { class: 'qr-overlay', onclick: function (e) { if (e.target === overlay) close(); } });
+    var card = el('div', { class: 'qr-card' });
+    overlay.appendChild(card);
+    function close() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); document.removeEventListener('keydown', onKey); }
+    function onKey(e) { if (e.key === 'Escape') close(); else if (e.key === 'ArrowRight') go(1); else if (e.key === 'ArrowLeft') go(-1); }
+    function go(d) { idx = Math.max(0, Math.min(pages.length - 1, idx + d)); draw(); }
+    function draw() {
+      D.clear(card);
+      card.appendChild(el('button', { class: 'qr-close', type: 'button', text: '✕', 'aria-label': 'Close', onclick: close }));
+      card.appendChild(el('h3', { class: 'qr-title', text: title }));
+      if (intro) card.appendChild(el('p', { class: 'qr-intro', text: intro }));
+      var p = pages[idx];
+      var svg = qrSvg(p.text);
+      var box = el('div', { class: 'qr-code' });
+      if (svg) box.innerHTML = svg; else box.appendChild(el('p', { class: 'muted', text: 'This record is too long for one code — use Export or Share instead.' }));
+      card.appendChild(box);
+      card.appendChild(el('p', { class: 'qr-caption', text: p.caption || '' }));
+      if (pages.length > 1) {
+        card.appendChild(el('div', { class: 'qr-nav' }, [
+          el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: '‹ Prev', disabled: idx === 0, onclick: function () { go(-1); } }),
+          el('span', { class: 'qr-count', text: (idx + 1) + ' of ' + pages.length }),
+          el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Next ›', disabled: idx === pages.length - 1, onclick: function () { go(1); } })
+        ]));
+      }
+    }
+    draw();
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+  }
+
+  /* compact single-line record for a QR (same column order as the CSV). */
+  function recLine(name, admno, cls, module, pct, passed, when) {
+    return csvRow([name, admno, cls, module, pct + '%', passed ? 'PASS' : 'Not yet', when]);
+  }
+  var QR_FIELDS = 'Fields in order: name, admission no, class, module, score, result, completed.';
+
   function resultFilename(s, ext) {
     return ['digilit', slug(s.learner.classGroup), slug(s.learner.admno || s.learner.name),
       slug(s.moduleId), D.stamp(s.finishedAt || new Date())].join('_') + '.' + ext;
@@ -175,6 +247,14 @@
           var a = { learner: s.learner, moduleName: s.module.name, score: r.score, passed: r.passed,
             got: r.got, items: r.items, minutes: 1, at: D.timeStamp(s.finishedAt) };
           download(resultFilename(s, 'csv'), D.attemptsCsv([a]), 'text/csv');
+        } }),
+      el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Share result…',
+        onclick: function () { shareOrDownload(resultFilename(s, 'json'), JSON.stringify(resultPayload(s), null, 2), 'application/json', (s.learner.name || 'Trainee') + ' — ' + s.module.name); } }),
+      el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Show QR',
+        onclick: function () {
+          openQrModal('Scan this result', 'Scan with a phone to capture it. ' + QR_FIELDS,
+            [{ text: recLine(s.learner.name, s.learner.admno, s.learner.classGroup, s.module.name, pct, r.passed, D.timeStamp(s.finishedAt)),
+               caption: (s.learner.name || 'Unnamed') + ' · ' + s.module.name + ' · ' + pct + '%' }]);
         } }),
       el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Print results sheet',
         onclick: function () { window.print(); } }),
@@ -288,6 +368,18 @@
         onclick: function () { download('digilit_records_' + D.stamp() + '.csv', D.attemptsCsv(attempts), 'text/csv'); } }),
       el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Export all as JSON',
         onclick: function () { download('digilit_records_' + D.stamp() + '.json', JSON.stringify(attempts, null, 2), 'application/json'); } }),
+      el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Share CSV…',
+        onclick: function () { shareOrDownload('digilit_records_' + D.stamp() + '.csv', D.attemptsCsv(attempts), 'text/csv', 'DigiLit records (' + attempts.length + ')'); } }),
+      el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Show QR codes',
+        onclick: function () {
+          var pages = attempts.slice().reverse().map(function (a) {
+            var pct = Math.round(a.score * 100);
+            return { text: recLine(a.learner.name, a.learner.admno, a.learner.classGroup, a.moduleName, pct, a.passed, a.at),
+              caption: (a.learner.name || 'Unnamed') + ' · ' + a.moduleName + ' · ' + pct + '%' };
+          });
+          openQrModal('Scan results — ' + pages.length + ' attempt' + (pages.length === 1 ? '' : 's'),
+            'One code per attempt — scan each with a phone, use ‹ › to move. ' + QR_FIELDS, pages);
+        } }),
       el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Print sheet',
         onclick: function () { window.print(); } }),
       el('button', { class: 'dl-btn dl-btn-ghost', type: 'button', text: 'Clear this computer',

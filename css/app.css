@@ -982,6 +982,25 @@ p { margin: 0 0 .8em; }
 .of-modal-row { display: flex; justify-content: flex-end; gap: 8px; }
 
 /* ============================================================= *
+ *  Results QR modal (offline collection)                        *
+ * ============================================================= */
+.qr-overlay { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center;
+  background: rgba(16, 22, 30, .55); backdrop-filter: blur(2px); padding: 20px; }
+.qr-card { position: relative; width: min(360px, 92vw); background: var(--surface); border-radius: 14px;
+  padding: 22px 22px 18px; box-shadow: 0 18px 50px rgba(0,0,0,.3); text-align: center; }
+.qr-close { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--muted); font-size: 16px; cursor: pointer; line-height: 1; }
+.qr-close:hover { background: var(--line); color: var(--ink); }
+.qr-title { margin: 2px 24px 6px; font-size: 1.05rem; }
+.qr-intro { margin: 0 0 14px; font-size: .82rem; color: var(--muted); line-height: 1.45; }
+.qr-code { width: 248px; height: 248px; margin: 0 auto; background: #fff; border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px; display: grid; place-items: center; }
+.qr-code svg { width: 100%; height: 100%; display: block; }
+.qr-caption { margin: 12px 0 0; font-weight: 600; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.qr-nav { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 14px; }
+.qr-count { font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 64px; }
+
+/* ============================================================= *
  *  Rotate-to-landscape gate (phones)                            *
  *  The simulators need landscape width, so on a small screen    *
  *  held in portrait we cover the app with a rotate prompt.      *
