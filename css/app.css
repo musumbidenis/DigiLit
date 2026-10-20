@@ -980,3 +980,27 @@ p { margin: 0 0 .8em; }
 .of-modal-card h3 { margin: 0 0 12px; font-size: 15px; }
 .of-modal-card .dl-input { width: 100%; margin-bottom: 14px; }
 .of-modal-row { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ============================================================= *
+ *  Rotate-to-landscape gate (phones)                            *
+ *  The simulators need landscape width, so on a small screen    *
+ *  held in portrait we cover the app with a rotate prompt.      *
+ * ============================================================= */
+#rotate-gate { display: none; }
+@media (max-width: 860px) and (orientation: portrait) {
+  #app, .app-foot { display: none !important; }
+  #rotate-gate {
+    display: flex; position: fixed; inset: 0; z-index: 99999;
+    align-items: center; justify-content: center; padding: 28px;
+    background: linear-gradient(160deg, var(--teal-d), #06252a);
+    color: #eaf4f4; text-align: center;
+  }
+  .rotate-card { max-width: 340px; }
+  .rotate-ic { color: #8fd3d6; animation: rotate-hint 2.4s ease-in-out infinite; transform-origin: center; }
+  #rotate-gate h2 { margin: 14px 0 8px; font-size: 1.3rem; font-weight: 700; }
+  #rotate-gate p { margin: 0; font-size: .98rem; line-height: 1.5; color: #c6e2e3; }
+  @keyframes rotate-hint {
+    0%, 55% { transform: rotate(0deg); }
+    75%, 100% { transform: rotate(-90deg); }
+  }
+}
