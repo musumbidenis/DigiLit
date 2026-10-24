@@ -80,5 +80,9 @@
 <!-- Runner last: it boots the app once everything is registered. -->
 <script src="js/engine.js"></script>
 
+<!-- Design-notes tool (for the people building the app, not a feature). Loads only when the
+     address ends in ?notes=1, so it costs learners and invigilators nothing. See js/design-notes.js. -->
+<script>if (/[?&]notes=1(&|$)/.test(location.search)) { var s = document.createElement('script'); s.src = 'js/design-notes.js'; document.head.appendChild(s); }</script>
+
 </body>
 </html>
